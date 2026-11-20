@@ -69,7 +69,8 @@ hotels-bookings-analysis/
 ├── requirements.txt
 ├── src/
 │   └── hotel_bookings_analysis.py   # all analysis + the 8 charts + key numbers
-├── data/                            # put Hotel_bookings_final.csv here (not included)
+├── data/
+│   └── Hotel_bookings_final.csv     # dataset (30,000 bookings, 24 columns)
 ├── charts/                          # chart PNGs produced by the script
 └── report/
     ├── HotelBookings_Analysis_Report.pdf   # final report (read this one on GitHub)
@@ -85,7 +86,7 @@ pip install -r requirements.txt
 python src/hotel_bookings_analysis.py
 ```
 
-Place the dataset at `data/Hotel_bookings_final.csv` first (see [Data notes](#data-notes)). The script writes the 8 charts to `charts/` and prints the key numbers. Use `--data` and `--out` to point it at other paths.
+The script reads `data/Hotel_bookings_final.csv`, writes the 8 charts to `charts/` and prints the key numbers. Use `--data` and `--out` to point it at other paths.
 
 ## Method
 
@@ -98,27 +99,34 @@ Place the dataset at `data/Hotel_bookings_final.csv` first (see [Data notes](#da
 
 ## Data notes
 
-The dataset (`Hotel_bookings_final.csv`, 30,000 rows × 24 columns, 1 Apr 2024 – 30 Apr 2025) was provided by TravClan for the assignment and is **not included** in this repo. To re-run the analysis, place it at `data/Hotel_bookings_final.csv`.
+The dataset (`data/Hotel_bookings_final.csv`) has 30,000 rows and 24 columns. Bookings were made between 1 Apr 2024 and 30 Apr 2025. TravClan provided it for the assignment.
 
-Columns used in the analysis:
-
-| Column | Description |
-|---|---|
-| `booking_date` | Date the booking was made. Drives the monthly, quarterly and seasonal views |
-| `check_in_date` | Guest check-in date (empty for cancelled or failed bookings) |
-| `check_out_date` | Guest check-out date (empty for cancelled or failed bookings). Length of stay = check-out − check-in |
-| `travel_date` | Date of travel |
-| `booking_status` | `Confirmed`, `Cancelled` or `Failed` |
-| `booking_channel` | `Web`, `Mobile App` or `Travel Agent` |
-| `city` | Hotel city: one of 10 US cities (Chicago, San Francisco, Los Angeles, Las Vegas, Boston, New York, Orlando, Dallas, Miami, Seattle) |
-| `room_type` | `Standard`, `Deluxe` or `Suite` |
-| `star_rating` | Hotel star rating, 2 to 5 |
-| `selling_price` | Price charged to the customer (₹) |
-| `costprice` | Cost of the booking to the platform (₹) |
-| `booking_value` | Total value of the booking (₹). Used to size revenue at risk from cancellations |
-| `coupon_redeem` | Coupon amount redeemed on the booking |
-
-The rest of the 24 columns (for example, payment method and cashback) were explored but not used in the charts.
+| # | Column | Type | Description |
+|---|---|---|---|
+| 1 | `customer_id` | int | Customer identifier (499 unique customers) |
+| 2 | `property_id` | int | Hotel property identifier (4 properties: 1, 3, 5, 7) |
+| 3 | `city` | text | Hotel city, one of 10 US cities: Boston, Chicago, Dallas, Las Vegas, Los Angeles, Miami, New York, Orlando, San Francisco, Seattle |
+| 4 | `star_rating` | int | Hotel star rating: 2, 3, 4 or 5 |
+| 5 | `booking_date` | date | Date the booking was made. Drives the monthly, quarterly and seasonal views |
+| 6 | `check_in_date` | date | Check-in date. Empty for 5,468 cancelled or failed bookings |
+| 7 | `check_out_date` | date | Check-out date. Empty for the same 5,468 rows |
+| 8 | `room_type` | text | `Standard`, `Deluxe` or `Suite` |
+| 9 | `num_rooms_booked` | int | Number of rooms in the booking (1–3) |
+| 10 | `stay_type` | text | Purpose of stay: `Business` or `Leisure` |
+| 11 | `booking_channel` | text | Sales channel: `Web`, `Mobile App` or `Travel Agent` |
+| 12 | `booking_value` | float | Value of the booking (₹). Summed over cancelled bookings to get revenue at risk |
+| 13 | `costprice` | int | Cost of the room to the platform (₹) |
+| 14 | `markup` | int | Margin added on top of cost (₹). Always equals `selling_price − costprice` |
+| 15 | `selling_price` | int | Price charged to the customer (₹). Revenue figures sum this for confirmed bookings |
+| 16 | `payment_method` | text | `Credit Card`, `Debit Card`, `PayPal` or `Bank Transfer` |
+| 17 | `refund_status` | text | Whether a refund was issued: `Yes` or `No` |
+| 18 | `refund_amount` | float | Refund amount (₹). 0 when no refund |
+| 19 | `channel_of_booking` | text | Platform the booking came through: `Web`, `Android` or `iOS` (different from `booking_channel`) |
+| 20 | `booking_status` | text | `Confirmed` (72.2%), `Cancelled` (20.2%) or `Failed` (7.5%) |
+| 21 | `travel_date` | date | Travel date recorded for the booking |
+| 22 | `cashback` | float | Cashback given on the booking (₹) |
+| 23 | `coupon_redeem` | float | Coupon discount redeemed (₹). 0 when no coupon was used |
+| 24 | `Coupon USed?` | text | Whether a coupon was used: `Yes` or `No` (column name as in the source file) |
 
 Derived fields: `is_cancelled`, `is_confirmed`, `length_of_stay`, `profit` (= `selling_price − costprice`), `booking_month`, `booking_quarter` and `season`.
 
